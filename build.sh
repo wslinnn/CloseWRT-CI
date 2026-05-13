@@ -52,6 +52,9 @@ fi
 WORK_DIR="$(cd "$(dirname "$0")" && pwd)"
 cd "${WORK_DIR}"
 
+# 移除 Windows 路径，避免特殊字符（括号、空格）导致子 shell 编译失败
+export PATH=$(echo "$PATH" | tr ':' '\n' | grep -v '/mnt/' | tr '\n' ':' | sed 's/:$//')
+
 # 导出环境变量供子脚本使用
 export GITHUB_WORKSPACE="${WORK_DIR}"
 export GITHUB_ENV="${WORK_DIR}/.build_env"
