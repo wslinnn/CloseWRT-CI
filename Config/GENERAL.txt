@@ -34,8 +34,7 @@ CONFIG_BPF_TOOLCHAIN_HOST=y
 CONFIG_KERNEL_XDP_SOCKETS=y
 CONFIG_PACKAGE_kmod-xdp-sockets-diag=y
 CONFIG_PACKAGE_kmod-sched-bpf=y
-# 烧录后再手动安装daede
-CONFIG_PACKAGE_luci-app-daede=n
+CONFIG_PACKAGE_luci-app-daede=y
 #参数调整
 CONFIG_CCACHE=y
 CONFIG_DEVEL=y
