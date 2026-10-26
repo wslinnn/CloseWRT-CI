@@ -184,7 +184,8 @@ jobs:
 
           $GITHUB_WORKSPACE/Scripts/Packages.sh
           $GITHUB_WORKSPACE/Scripts/Handles.sh
-          $GITHUB_WORKSPACE/.github/scripts/prepare-i2c-tools.sh
+          # prepare-i2c-tools.sh 按 immortalwrt/packages master 的 i2c-tools 基线写死，
+          # 本仓库源码树用 openwrt-24.10 feed（无基线行）会校验失败，故不执行。
 
       - name: Custom Settings
         run: |
