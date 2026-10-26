@@ -241,6 +241,16 @@ jobs:
 
           cp -f ./.config ./upload/Config-"$WRT_CONFIG"-"$WRT_INFO"-"$WRT_BRANCH"-"$WRT_DATE".txt
 
+          # 不锁版本，只留痕：记录当次固件实际使用的 openwrt-daede 提交及其组件 pin。
+          if [ -d package/openwrt-daede/.git ]; then
+            {
+              echo "REPO=$(git -C package/openwrt-daede remote get-url origin)"
+              echo "COMMIT=$(git -C package/openwrt-daede rev-parse HEAD)"
+              [ ! -f package/openwrt-daede/ci/pins.env ] || cat package/openwrt-daede/ci/pins.env
+            } > ./upload/DAEDE-SOURCE.txt
+            echo "WRT_DAEDE=$(git -C package/openwrt-daede rev-parse --short HEAD)" >> $GITHUB_ENV
+          fi
+
           if [[ "$WRT_TEST" != 'true' ]]; then
             echo "WRT_KVER=$(find ./bin/targets/ -type f -name "*.manifest" -exec grep -oP '^kernel - \K[\d\.]+' {} \;)" >> $GITHUB_ENV
             echo "WRT_LIST=$(find ./bin/targets/ -type f -name "*.manifest" -exec grep -oP '^luci-(app|theme)[^ ]*' {} \; | tr '\n' ' ')" >> $GITHUB_ENV
@@ -274,6 +284,7 @@ jobs:
             源码：${{env.WRT_REPO}}
             分支：${{env.WRT_BRANCH}}
             提交：${{env.WRT_HASH}}
+            DAEDE：${{env.WRT_DAEDE}}
 
             配置：${{env.WRT_CONFIG}}
             平台：${{env.WRT_TARGET}}
