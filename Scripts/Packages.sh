@@ -67,22 +67,16 @@ rm -rf ./feeds/luci/applications/luci-app-dae* ./feeds/packages/net/dae*
 UPDATE_PACKAGE "daede" "kenzok8/openwrt-daede" "main"
 
 # daed 的 go.mod 要求 go >= 1.26；openwrt-24.10 系 feed 的 golang 只有 1.23，
-# 版本不足时用 immortalwrt/packages master 的 golang 目录覆盖 feed，
-# 否则 openwrt-daede/daed 编译会在版本门槛上直接失败。
+# 版本不足时按 openwrt-daede 上游流水线的做法，用 kenzok8/golang 的 1.26 分支
+# 原位替换 feed 的 lang/golang（该仓库为旧 buildroot 维护的自包含 backport；
+# 不能用 master 的 packages feed——其 golang1.27 多包结构在 24.10 扫描不出）。
 GOLANG_MAKEFILE=./feeds/packages/lang/golang/golang/Makefile
 GO_VER=$(sed -n 's/^GO_VERSION_MAJOR_MINOR:=//p' "$GOLANG_MAKEFILE")
 if [ -n "$GO_VER" ] && [ "$(printf '%s\n1.26\n' "$GO_VER" | sort -V | head -n1)" != "1.26" ]; then
-	echo "golang feed $GO_VER < 1.26, overriding with immortalwrt/packages master"
-	GOLANG_TMP=$(mktemp -d)
-	if git clone --depth=1 --filter=blob:none --sparse --branch master \
-		https://github.com/immortalwrt/packages.git "$GOLANG_TMP/packages" && \
-		git -C "$GOLANG_TMP/packages" sparse-checkout set lang/golang; then
-		rm -rf ./feeds/packages/lang/golang
-		cp -a "$GOLANG_TMP/packages/lang/golang" ./feeds/packages/lang/golang
-	else
+	echo "golang feed $GO_VER < 1.26, overriding with kenzok8/golang 1.26"
+	rm -rf ./feeds/packages/lang/golang
+	git clone --depth 1 --branch 1.26 https://github.com/kenzok8/golang ./feeds/packages/lang/golang || \
 		echo "golang override failed; daed build will likely fail with go version errors"
-	fi
-	rm -rf "$GOLANG_TMP"
 fi
 
 UPDATE_PACKAGE "diskmanager" "4IceG/luci-app-mini-diskmanager" "main"
