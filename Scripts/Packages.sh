@@ -60,6 +60,10 @@ UPDATE_PACKAGE "nikki" "nikkinikki-org/OpenWrt-nikki" "main"
 UPDATE_PACKAGE "openclash" "vernesong/OpenClash" "dev" "pkg"
 UPDATE_PACKAGE "passwall" "Openwrt-Passwall/openwrt-passwall" "main" "pkg"
 UPDATE_PACKAGE "passwall2" "Openwrt-Passwall/openwrt-passwall2" "main" "pkg"
+# feeds 里还留着旧的 dae/daed 独立包（luci-app-dae、luci-app-daed、dae、daed），
+# UPDATE_PACKAGE 只删名字含 "daede" 的目录删不掉它们；同名旧包会和新拉的
+# openwrt-daede 冲突，导致编进固件的是旧版 daed（内嵌面板差异很大）。
+rm -rf ./feeds/luci/applications/luci-app-dae* ./feeds/packages/net/dae*
 UPDATE_PACKAGE "daede" "kenzok8/openwrt-daede" "main"
 
 UPDATE_PACKAGE "diskmanager" "4IceG/luci-app-mini-diskmanager" "main"
