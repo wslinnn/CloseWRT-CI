@@ -85,16 +85,16 @@ sed -i \
 	-e "s|^CORE_VERSION:=.*|CORE_VERSION:=core-${CORE_COMMIT:0:7}|" \
 	./package/luci-app-daed/daed/Makefile
 
-# daed 的 go.mod 要求 go >= 1.26；openwrt-24.10 系 feed 的 golang 只有 1.23，
-# 版本不足时按 openwrt-daede 上游流水线的做法，用 kenzok8/golang 的 1.26 分支
-# 原位替换 feed 的 lang/golang（该仓库为旧 buildroot 维护的自包含 backport；
+# dae main 自 2026-10-30 起要求 go 1.27（#1154），openwrt-24.10 系 feed 的 golang
+# 只有 1.23，用 kenzok8/golang 的 1.27 分支原位替换 feed 的 lang/golang（该仓库
+# 为旧 buildroot 维护的自包含 backport，1.27 分支与已验证的 1.26 分支同构；
 # 不能用 master 的 packages feed——其 golang1.27 多包结构在 24.10 扫描不出）。
 GOLANG_MAKEFILE=./feeds/packages/lang/golang/golang/Makefile
 GO_VER=$(sed -n 's/^GO_VERSION_MAJOR_MINOR:=//p' "$GOLANG_MAKEFILE")
-if [ -n "$GO_VER" ] && [ "$(printf '%s\n1.26\n' "$GO_VER" | sort -V | head -n1)" != "1.26" ]; then
-	echo "golang feed $GO_VER < 1.26, overriding with kenzok8/golang 1.26"
+if [ -n "$GO_VER" ] && [ "$(printf '%s\n1.27\n' "$GO_VER" | sort -V | head -n1)" != "1.27" ]; then
+	echo "golang feed $GO_VER < 1.27, overriding with kenzok8/golang 1.27"
 	rm -rf ./feeds/packages/lang/golang
-	git clone --depth 1 --branch 1.26 https://github.com/kenzok8/golang ./feeds/packages/lang/golang || \
+	git clone --depth 1 --branch 1.27 https://github.com/kenzok8/golang ./feeds/packages/lang/golang || \
 		echo "golang override failed; daed build will likely fail with go version errors"
 fi
 
