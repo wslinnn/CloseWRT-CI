@@ -68,14 +68,14 @@ rm -rf ./feeds/luci/applications/luci-app-dae* ./feeds/packages/net/dae*
 # luci-app-daed 管线（标准 bpf.mk，无第三方补丁），并替换其版本钉子：
 #   daed 外壳 = 归档前最后提交 be4ef87（2026-09-24，v2.1.1 同期）；
 #   wing 中间层 = 归档前最后提交 b089b56（2026-09-23）；
-#   dae 核心 = main 最新 29a7028（2026-10-30）——官方 v2.1.1 发布内嵌的是
-#   4 月旧 core（上游 #1134「崩溃后 eBPF 残留致断网」的根源），必须换掉。
-# 若 wing 与新 core 出现 Go 编译不兼容，把 CORE_COMMIT 回退为
-# v2.1.1 tag（6c4ccd8516691e3383c5b5fb0630a427b915d8fe）。
-# 升级 core 只需更新 CORE_COMMIT 一个值。
+#   dae 核心 = v2.1.1 tag 6c4ccd8（2026-09-18，wing b089b56 的配套版本）。
+#   实测 dae main 10 月底已重构 netproxy/protocol API（BatchItem 等符号移除），
+#   归档的 wing 无法跟上主线漂移，只能锁在与 wing 同期的 core 上；
+#   官方 v2.1.1 发布内嵌的 4 月旧 core（#1134 断网根源）由此被纠正。
+#   dae main 后续若修复与 wing 的兼容，可再尝试更新 CORE_COMMIT。
 DAED_COMMIT=be4ef873c352a9ec930c877a3a821163f4b4ac0a
 WING_COMMIT=b089b568649f03f909477adb6c7db25535a58782
-CORE_COMMIT=29a70280fd7e0e73233e623d6dcd004c245882e2
+CORE_COMMIT=6c4ccd8516691e3383c5b5fb0630a427b915d8fe
 rm -rf ./package/luci-app-daed
 git clone --depth=1 https://github.com/QiuSimons/luci-app-daed ./package/luci-app-daed
 sed -i \
