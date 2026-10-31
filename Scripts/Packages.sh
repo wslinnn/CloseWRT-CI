@@ -65,17 +65,20 @@ UPDATE_PACKAGE "passwall2" "Openwrt-Passwall/openwrt-passwall2" "main" "pkg"
 rm -rf ./feeds/luci/applications/luci-app-dae* ./feeds/packages/net/dae*
 
 # daed 面板：官方 daed 仓库已归档，改用 ImmortalWrt 核心开发者 QiuSimons 的
-# luci-app-daed 管线（标准 bpf.mk，无第三方补丁），并替换其版本钉子：
-#   daed 外壳 = 归档前最后提交 be4ef87（2026-09-24，v2.1.1 同期）；
-#   wing 中间层 = 归档前最后提交 b089b56（2026-09-23）；
-#   dae 核心 = 最新 tag v2.1.1 对应提交 dbae2e82（2026-09-18，wing b089b56
-#   的配套版本）。实测 dae main 10 月底已重构 netproxy/protocol API（BatchItem
-#   等符号移除），归档的 wing 无法跟上主线漂移，只能锁在与 wing 同期的 core 上；
-#   官方 v2.1.1 发布内嵌的 4 月旧 core（#1134 断网根源）由此被纠正。
-#   dae main 后续若修复与 wing 的兼容，可再尝试更新 CORE_COMMIT。
+# luci-app-daed 管线。注意其 Makefile 里 wing 的重新 clone 会因目录已存在而
+# 静默失败（daed tarball 先解压子模块、失败又被 "; " 链吞掉），实际编译的
+# wing 永远是 daed tarball 钉的 dc50308（2026-05，v2.1.1 前的最后配套），
+# WING_VERSION 钉子仅影响面板显示串，不产生实际 checkout。
+#   daed 外壳 = 归档前最后提交 be4ef87（2026-09-24）；
+#   wing（实际生效）= dc50308（daed tarball 子模块）；
+#   dae 核心 = 5db27a0（2026-08-26）——QiuSimons 实测的与 wing dc50308 配套
+#   的最后版本：9 月起 dae 的 dialer.NewFromLink 改名 NewFromLinkContext、
+#   control 新增 outbound.BatchItem 引用，而 dc50308 的 go.mod 把 outbound
+#   锁在 4 月版（无 BatchItem），更新的 core 一律编不过（三轮构建实测复现）。
+#   升级 core 需等 wing/dae 恢复配套，或改用非归档维护的分支。
 DAED_COMMIT=be4ef873c352a9ec930c877a3a821163f4b4ac0a
-WING_COMMIT=b089b568649f03f909477adb6c7db25535a58782
-CORE_COMMIT=dbae2e82d3ed5324e1648548720f8bbc8cde3882
+WING_COMMIT=dc503088945812c11235b35362d2bfa1a4c3bdf0
+CORE_COMMIT=5db27a0028d36e7847bd3796497df952337a20e2
 rm -rf ./package/luci-app-daed
 git clone --depth=1 https://github.com/QiuSimons/luci-app-daed ./package/luci-app-daed
 sed -i \
