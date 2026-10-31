@@ -61,10 +61,29 @@ UPDATE_PACKAGE "openclash" "vernesong/OpenClash" "dev" "pkg"
 UPDATE_PACKAGE "passwall" "Openwrt-Passwall/openwrt-passwall" "main" "pkg"
 UPDATE_PACKAGE "passwall2" "Openwrt-Passwall/openwrt-passwall2" "main" "pkg"
 # feeds 里还留着旧的 dae/daed 独立包（luci-app-dae、luci-app-daed、dae、daed），
-# UPDATE_PACKAGE 只删名字含 "daede" 的目录删不掉它们；同名旧包会和新拉的
-# openwrt-daede 冲突，导致编进固件的是旧版 daed（内嵌面板差异很大）。
+# 与新包同名会冲突，导致编进固件的是旧版，先清掉。
 rm -rf ./feeds/luci/applications/luci-app-dae* ./feeds/packages/net/dae*
-UPDATE_PACKAGE "daede" "kenzok8/openwrt-daede" "main"
+
+# daed 面板：官方 daed 仓库已归档，改用 ImmortalWrt 核心开发者 QiuSimons 的
+# luci-app-daed 管线（标准 bpf.mk，无第三方补丁），并替换其版本钉子：
+#   daed 外壳 = 归档前最后提交 be4ef87（2026-09-24，v2.1.1 同期）；
+#   wing 中间层 = 归档前最后提交 b089b56（2026-09-23）；
+#   dae 核心 = main 最新 29a7028（2026-10-30）——官方 v2.1.1 发布内嵌的是
+#   4 月旧 core（上游 #1134「崩溃后 eBPF 残留致断网」的根源），必须换掉。
+# 若 wing 与新 core 出现 Go 编译不兼容，把 CORE_COMMIT 回退为
+# v2.1.1 tag（6c4ccd8516691e3383c5b5fb0630a427b915d8fe）。
+# 升级 core 只需更新 CORE_COMMIT 一个值。
+DAED_COMMIT=be4ef873c352a9ec930c877a3a821163f4b4ac0a
+WING_COMMIT=b089b568649f03f909477adb6c7db25535a58782
+CORE_COMMIT=29a70280fd7e0e73233e623d6dcd004c245882e2
+rm -rf ./package/luci-app-daed
+git clone --depth=1 https://github.com/QiuSimons/luci-app-daed ./package/luci-app-daed
+sed -i \
+	-e "s|^PKG_SOURCE_VERSION:=.*|PKG_SOURCE_VERSION:=$DAED_COMMIT|" \
+	-e "s|^DAED_VERSION:=.*|DAED_VERSION:=daed-${DAED_COMMIT:0:7}|" \
+	-e "s|^WING_VERSION:=.*|WING_VERSION:=wing-${WING_COMMIT:0:7}|" \
+	-e "s|^CORE_VERSION:=.*|CORE_VERSION:=core-${CORE_COMMIT:0:7}|" \
+	./package/luci-app-daed/daed/Makefile
 
 # daed 的 go.mod 要求 go >= 1.26；openwrt-24.10 系 feed 的 golang 只有 1.23，
 # 版本不足时按 openwrt-daede 上游流水线的做法，用 kenzok8/golang 的 1.26 分支
