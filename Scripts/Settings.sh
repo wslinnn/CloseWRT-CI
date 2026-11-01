@@ -14,14 +14,18 @@ find ./feeds/luci/modules/luci-mod-status/ -type f -name "10_system.js" -exec se
 #默认开启TR3000 USB供电
 sed -i '/modem-power/,/};/{s/gpio-export,output = <1>;/gpio-export,output = <0>;/}' target/linux/mediatek/dts/mt7981b-cudy-tr3000-v1.dtsi
 
-WIFI_FILE="./package/mtk/applications/mtwifi-cfg/files/mtwifi.sh"
-if [ -f "$WIFI_FILE" ]; then
-	#修改WIFI名称
-	sed -i "s/ImmortalWrt/$WRT_SSID/g" $WIFI_FILE
-	#修改WIFI加密
-	sed -i "s/encryption=.*/encryption='psk2+ccmp'/g" $WIFI_FILE
-	#修改WIFI密码
-	sed -i "/set wireless.default_\${dev}.encryption='psk2+ccmp'/a \\\t\t\t\t\t\set wireless.default_\${dev}.key='$WRT_WORD'" $WIFI_FILE
+MTWIFI_SH="./package/mtk/applications/mtwifi-cfg/files/mtwifi.sh"
+if [ -f "$MTWIFI_SH" ]; then
+	#修改默认名称密码
+	sed -i -E "s/ImmortalWrt/$WRT_SSID/g; s/(.*)encryption=none/\1encryption=psk2+ccmp\n\1key=$WRT_WORD/" $MTWIFI_SH
+fi
+
+MTWIFI_UC="./package/mtk/applications/mtwifi-cfg-ucode/files/lib/wifi/mtwifi.uc"
+if [ -f "$MTWIFI_UC" ]; then
+	#修改默认名称密码
+	sed -i "s/ImmortalWrt/$WRT_SSID/g; s/\"none\"/\"psk2+ccmp\", \"key\": \"$WRT_WORD\"/" $MTWIFI_UC
+	# 使用对应的用户态组件，避免与旧 Lua 组件同时选中。
+	printf '# CONFIG_PACKAGE_mtwifi-cfg is not set\n# CONFIG_PACKAGE_iwinfo is not set\nCONFIG_PACKAGE_mtwifi-cfg-ucode=y\n' >> .config
 fi
 
 CFG_FILE="./package/base-files/files/bin/config_generate"
@@ -34,6 +38,7 @@ sed -i "s/hostname='.*'/hostname='$WRT_NAME'/g" $CFG_FILE
 echo "CONFIG_PACKAGE_luci=y" >> ./.config
 echo "CONFIG_LUCI_LANG_zh_Hans=y" >> ./.config
 echo "CONFIG_PACKAGE_luci-theme-$WRT_THEME=y" >> ./.config
+echo "CONFIG_PACKAGE_luci-app-$WRT_THEME=y" >> ./.config
 echo "CONFIG_PACKAGE_luci-app-$WRT_THEME-config=y" >> ./.config
 
 #引入私有扩展配置
