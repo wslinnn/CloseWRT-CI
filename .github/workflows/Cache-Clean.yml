@@ -4,10 +4,7 @@
 name: Cache-Clean
 
 on:
-  #自动清理：每周一早上4点
-  schedule:
-    - cron: 0 20 * * 0
-  #手动清理
+  #缓存常驻：淘汰由 WRT-CORE 的 cache-rollover 自动完成，本流程仅作手动强制回收的逃生口
   workflow_dispatch:
 
 permissions: write-all
