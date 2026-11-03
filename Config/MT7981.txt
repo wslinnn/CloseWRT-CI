@@ -53,7 +53,9 @@ CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_xiaomi_mi-router-wr30u-stock=y
 CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_xiaomi_mi-router-wr30u-ubootmod=y
 CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_zbtlink_zbt-z8102ax=y
 CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_zbtlink_zbt-z8103ax=y
-CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_zbtlink_zbt-z8103ax-c=y
+# zbt-z8103ax-c：chasey-dev 25.12 树的该设备定义仍引用已删除的 mt76 三件套，
+# 会导致 25.12 矩阵构建失败，故从清单移除（nmbm/ubootmod 变体不受影响）
+# CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_zbtlink_zbt-z8103ax-c=y
 CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_zbtlink_zbt-z8103ax-c-nmbm=y
 CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_zbtlink_zbt-z8103ax-c-ubootmod=y
 #必选组件

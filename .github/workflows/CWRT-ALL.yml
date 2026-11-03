@@ -53,10 +53,9 @@ jobs:
         CONFIG: [MT7981]
         REPO_INFO:
           - {SOURCE: "Yuzhii0718/immortalwrt-mt798x-6.6-padavanonly", BRANCH: "openwrt-24.10-6.6"}
-          # chasey-dev 25.12 树的 MT7981 设备定义仍引用已删除的 mt76 三件套
-          # （kmod-mt7915e/kmod-mt7981-firmware/mt7981-wo-firmware），apk 报 no such
-          # package；其 MT7986 定义已改空包走闭源栈，MT7981 待上游补齐后再启用。
-          #- {SOURCE: "chasey-dev/immortalwrt-mt798x-rebase", BRANCH: "25.12"}
+          # chasey-dev 25.12 树（WiFi 走闭源 mt_wifi）：其 MT7981 清单要求设备
+          # 定义不得引用已删除的 mt76 三件套，新增设备前需核对 filogic.mk
+          - {SOURCE: "chasey-dev/immortalwrt-mt798x-rebase", BRANCH: "25.12"}
 
     #调用公用编译核心WRT-CORE.yml
     uses: ./.github/workflows/WRT-CORE.yml
