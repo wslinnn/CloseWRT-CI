@@ -55,14 +55,6 @@ fi
 FIX "mihomo-conflicts" "$PACKAGE_PATH/OpenWrt-nikki/mihomo-alpha" sed -i \
 	'/^  CONFLICTS:=mihomo-meta$/d' "$PACKAGE_PATH/OpenWrt-nikki/mihomo-alpha/Makefile"
 
-# hnat-detect 硬依赖 ip-tiny，与本仓库配置选择的 ip-full 在 apk 下构成同虚包冲突
-# （两者都 PROVIDES:=ip，apk 不允许同一安装事务里出现两个提供者）。
-# 改为虚拟依赖 +ip：已选 ip-full 时由它满足，未选时仍回落到默认的 ip-tiny。
-if grep -q 'DEPENDS.*+ip-tiny' "$PACKAGE_PATH/mtk/applications/hnat-detect/Makefile" 2>/dev/null; then
-	FIX "hnat-detect-ip" "$PACKAGE_PATH/mtk/applications/hnat-detect" sed -i \
-		's/+ip-tiny/+ip/' "$PACKAGE_PATH/mtk/applications/hnat-detect/Makefile"
-fi
-
 # 避免新版 WeeChat 虚拟依赖生成 Kconfig 自循环。
 if grep -q '^define Package/weechat-minimal$' "$FEEDS_PATH/packages/net/weechat/Makefile"; then
 	FIX "weechat-dependency" "$FEEDS_PATH/luci/applications/luci-app-weechat" sed -i \
